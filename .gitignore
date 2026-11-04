@@ -1,0 +1,13 @@
+# BMW's oap-sdk: extract it from your own head unit (kit/tools/extract_sdk.js); never commit it
+oap-sdk
+# build output (a local build's packages contain the SDK until release/release.sh strips it)
+dist/
+build/
+*.tgz
+*.mgu
+*.pem
+*.key
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
