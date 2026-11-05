@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+[Unit]
+Description=jap-cams events: Protect detections for the car's timeline (and the optional Home Assistant hook on :18641)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/jap-cams/events.py
+User=japcams
+StateDirectory=jap-cams
+Restart=always
+RestartSec=5
+Nice=5
+MemoryMax=256M
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

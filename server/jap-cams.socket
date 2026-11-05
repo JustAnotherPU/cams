@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+[Unit]
+Description=jap-cams: camera streams for the Cameras car app (one ffmpeg per connection)
+
+[Socket]
+# install.sh puts the address it was given here (0.0.0.0: every interface). Keep it off the internet: the car comes
+# in through your tunnel (a Tailscale subnet route, WireGuard, ...).
+ListenStream=@LISTEN@:18640
+Accept=yes
+# the machine can boot before its interface has the address: bind anyway
+FreeBind=yes
+# the app holds the event feed and the view, plus the next view and thumbnails while switching; a dead client still
+# counts until keepalive drops it (about 1 min after a car went to sleep or lost its tunnel)
+MaxConnections=12
+KeepAlive=yes
+KeepAliveTimeSec=30
+KeepAliveIntervalSec=10
+KeepAliveProbes=3
+
+[Install]
+WantedBy=sockets.target

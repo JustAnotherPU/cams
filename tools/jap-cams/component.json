@@ -1,0 +1,91 @@
+{
+  "id": "jap-cams",
+  "kind": "tool",
+  "version": "0.3.0",
+  "license": "GPL-3.0-or-later",
+  "title": "Cameras service",
+  "description": "The Cameras app's background service: camsd.js (Node 22) fetches the H.264 stream and the event feed from your jap-cams server through a local SOCKS5 proxy (Tailscale, ...), picks the camera that matters (rings, people, the latest detection), decodes the events' JPEG thumbnails (jpeg-js) and serves /run/jap-cams/ctl.sock to the app; camdec decodes the stream with the MSDK into the mgu-render video layer (/dev/shm/jap-video-cams)",
+  "requires": {
+    "mgu-deploy": "0.7.0",
+    "jap-node22": "22.23.4"
+  },
+  "uninstallable": true,
+  "internet": true,
+  "uids": [
+    65534
+  ],
+  "mguHmi": [
+    "ID7"
+  ],
+  "files": [
+    {
+      "path": "camdec",
+      "from": "build/camdec",
+      "mode": "0755"
+    },
+    {
+      "path": "camsd.js",
+      "from": "build/camsd.js",
+      "mode": "0644"
+    },
+    {
+      "path": "socks.js",
+      "from": "build/socks.js",
+      "mode": "0644"
+    },
+    {
+      "path": "vendor/jpeg-js/decoder.js",
+      "from": "build/vendor/jpeg-js/decoder.js",
+      "mode": "0644"
+    },
+    {
+      "path": "vendor/jpeg-js/LICENSE",
+      "from": "build/vendor/jpeg-js/LICENSE",
+      "mode": "0644"
+    },
+    {
+      "path": "vendor/jpeg-js/Apache-2.0.txt",
+      "from": "build/vendor/jpeg-js/Apache-2.0.txt",
+      "mode": "0644"
+    },
+    {
+      "path": "check.sh",
+      "from": "check.sh",
+      "mode": "0755"
+    },
+    {
+      "path": "LICENSE",
+      "from": "build/LICENSE",
+      "mode": "0644"
+    },
+    {
+      "path": "licenses/intel-mediasdk-headers.LICENSE",
+      "from": "build/licenses/intel-mediasdk-headers.LICENSE",
+      "mode": "0644"
+    }
+  ],
+  "check": [
+    "check.sh"
+  ],
+  "units": [
+    {
+      "name": "jap-cams.service",
+      "from": "systemd/jap-cams.service"
+    }
+  ],
+  "enable": [
+    {
+      "unit": "jap-cams.service",
+      "target": "multi-user.target"
+    }
+  ],
+  "crashNames": [
+    "camdec"
+  ],
+  "recmgr": [
+    "jap-cams"
+  ],
+  "restart": [
+    "jap-cams.service"
+  ]
+}
