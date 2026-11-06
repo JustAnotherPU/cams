@@ -36,7 +36,7 @@ path; the SSE2 path is checked in the x86_64 image (`make target`).
 ## Interface
 
 ```
-camdec --out /dev/shm/jap-video-ridewatch [--log FILE]
+camdec --out /dev/shm/mgu-video-ridewatch [--log FILE]
 ```
 
 stdin: raw Annex-B H.264, any chunking. stdout, JSON lines, one `write` each:

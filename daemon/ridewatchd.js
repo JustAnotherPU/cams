@@ -15,7 +15,7 @@
  *                   here at the first start), optional "homeSsid" (the home Wi-Fi, by hand: "car at home")}.
  *                   The app's settings set host, port, socks, socksFallback, lat and lon ({"cmd":"config"}).
  *   JAP_RIDEWATCH_CTL    /run/jap-ridewatch/ctl.sock               MGU_UPLINK /run/mgu-uplink/status.json (mgu-uplink's Wi-Fi state)
- *   JAP_CAMDEC      /var/opt/jap-ridewatch/current/camdec      JAP_RIDEWATCH_VIDEO /dev/shm/jap-video-ridewatch
+ *   JAP_CAMDEC      /var/opt/jap-ridewatch/current/camdec      JAP_RIDEWATCH_VIDEO /dev/shm/mgu-video-ridewatch
  *
  * App -> daemon: {"cmd":"list"} {"cmd":"view","view":"spot"|"mosaic"|i,"rect":"WxH"} {"cmd":"pick","cam":i}
  *   {"cmd":"config","host":[a,b,c,d],"port","socks","socksFallback","lat","lon"} (0.0.0.0 keeps the address in
@@ -63,7 +63,7 @@ const CONF = process.env.JAP_RIDEWATCH_CONF || '/var/opt/jap-ridewatch/state/ser
 const ORDER = require('path').join(require('path').dirname(CONF), 'order.json');   // the state dir: nobody's, 0700
 const CTL = process.env.JAP_RIDEWATCH_CTL || '/run/jap-ridewatch/ctl.sock';
 const BIN = process.env.JAP_CAMDEC || '/var/opt/jap-ridewatch/current/camdec';
-const VIDEO = process.env.JAP_RIDEWATCH_VIDEO || '/dev/shm/jap-video-ridewatch';
+const VIDEO = process.env.JAP_RIDEWATCH_VIDEO || '/dev/shm/mgu-video-ridewatch';
 const UPLINK = process.env.MGU_UPLINK || '/run/mgu-uplink/status.json';
 const BACKOFF = [1000, 2000, 4000, 8000, 10000];
 const FIRST_MS = 10000;          // connect to first IDR (measured 0.2 s cam, 0.5 s mosaic, 0.8-1.4 s spot)

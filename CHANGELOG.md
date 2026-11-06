@@ -6,6 +6,8 @@
   units say `ridewatch` too. Install the server again with `server/install.sh`, then set the Server IP in the app
   and add the car's new code.
 - README: which cameras work with what (Protect, other RTSP cameras).
+- The video frames go to `/dev/shm/mgu-video-ridewatch`: mgu-render only reads frame files named
+  `/dev/shm/mgu-video-*`, and refused the previous path.
 
 ## 0.3.0
 

@@ -14,11 +14,11 @@ SupplementaryGroups=video
 # server.json put there (token: 0600)
 ExecStartPre=-+/bin/sh -c 'mkdir -p /var/opt/jap-ridewatch/state && chown nobody:tm_oap_app /var/opt/jap-ridewatch/state && chmod 0700 /var/opt/jap-ridewatch/state && if [ -f /var/opt/jap-ridewatch/state/server.json ]; then chown nobody /var/opt/jap-ridewatch/state/server.json && chmod 0600 /var/opt/jap-ridewatch/state/server.json; fi'
 # a frame file left by another owner (root, a test) makes camdec exit 2 as nobody (/dev/shm is sticky)
-ExecStartPre=-+/bin/sh -c '[ -e /dev/shm/jap-video-ridewatch ] && [ "$(stat -c %%U /dev/shm/jap-video-ridewatch)" != nobody ] && rm -f /dev/shm/jap-video-ridewatch; true'
+ExecStartPre=-+/bin/sh -c '[ -e /dev/shm/mgu-video-ridewatch ] && [ "$(stat -c %%U /dev/shm/mgu-video-ridewatch)" != nobody ] && rm -f /dev/shm/mgu-video-ridewatch; true'
 Environment=JAP_RIDEWATCH_CONF=/var/opt/jap-ridewatch/state/server.json
 Environment=JAP_RIDEWATCH_CTL=/run/jap-ridewatch/ctl.sock
 Environment=JAP_CAMDEC=/var/opt/jap-ridewatch/current/camdec
-Environment=JAP_RIDEWATCH_VIDEO=/dev/shm/jap-video-ridewatch
+Environment=JAP_RIDEWATCH_VIDEO=/dev/shm/mgu-video-ridewatch
 ExecStart=/var/opt/jap-node22/current/bin/node /var/opt/jap-ridewatch/current/ridewatchd.js
 RuntimeDirectory=jap-ridewatch
 # 0755 like Moonride's: the socket itself is 0660, so only the app's group gets in

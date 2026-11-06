@@ -88,7 +88,7 @@ let daemon, out = '';
 function startDaemon(port) {
     daemon = cp.spawn(process.execPath, [path.join(__dirname, '..', 'ridewatchd.js')], {
         env: Object.assign({}, process.env, { JAP_RIDEWATCH_CONF: CONF, JAP_RIDEWATCH_CTL: CTL, JAP_CAMDEC: path.join(__dirname, 'fake_camdec.js'),
-            JAP_RIDEWATCH_VIDEO: path.join(tmp, 'jap-video-ridewatch'), MGU_UPLINK: path.join(tmp, 'status.json'), FAKE_CAMDEC_LOG: DLOG, FAKE_STATS_MS: '300' }),
+            JAP_RIDEWATCH_VIDEO: path.join(tmp, 'mgu-video-ridewatch'), MGU_UPLINK: path.join(tmp, 'status.json'), FAKE_CAMDEC_LOG: DLOG, FAKE_STATS_MS: '300' }),
         stdio: ['ignore', 'pipe', 'pipe'],
     });
     daemon.stdout.on('data', (d) => { out += d; });

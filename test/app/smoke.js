@@ -14,7 +14,7 @@ const Module = require('module');
 const stage = path.resolve(process.argv[2]), tmp = process.argv[3];
 const SRC = path.join(stage, 'source', 'javascript');
 const spec = JSON.parse(fs.readFileSync(path.join(SRC, 'kit', 'app-spec.json'), 'utf8'));
-const CTL = path.join(tmp, 'ctl.sock'), REN = path.join(tmp, 'render.sock'), VID = path.join(tmp, 'jap-video-ridewatch');
+const CTL = path.join(tmp, 'ctl.sock'), REN = path.join(tmp, 'render.sock'), VID = path.join(tmp, 'mgu-video-ridewatch');
 [CTL, REN].forEach((p) => { try { fs.unlinkSync(p); } catch (e) { /* none */ } });
 fs.writeFileSync(VID, Buffer.alloc(64));
 process.env.JAP_RIDEWATCH_CTL = CTL; process.env.MGU_RENDERD_SOCKET = REN; process.env.JAP_RIDEWATCH_VIDEO = VID;

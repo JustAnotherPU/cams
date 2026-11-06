@@ -2,7 +2,7 @@
 // Copyright (C) 2026 JustAnotherPU
 /* camdec: live H.264 from stdin -> mgu-render's MGVF video file (README.md).
  *
- *   camdec --out /dev/shm/jap-video-ridewatch [--log FILE]
+ *   camdec --out /dev/shm/mgu-video-ridewatch [--log FILE]
  *
  * Two threads. The main thread reads stdin, frames access units (feeder.h)
  * and decodes them on the GPU as they arrive (decoder_msdk.h: no VPP, NV12 in

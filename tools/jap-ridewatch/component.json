@@ -4,7 +4,7 @@
   "version": "0.3.1",
   "license": "GPL-3.0-or-later",
   "title": "RideWatch service",
-  "description": "The RideWatch app's background service: ridewatchd.js (Node 22) fetches the H.264 stream and the event feed from your RideWatch server through a local SOCKS5 proxy (Tailscale, ...), picks the camera that matters (rings, people, the latest detection), decodes the events' JPEG thumbnails (jpeg-js) and serves /run/jap-ridewatch/ctl.sock to the app; camdec decodes the stream with the MSDK into the mgu-render video layer (/dev/shm/jap-video-ridewatch)",
+  "description": "The RideWatch app's background service: ridewatchd.js (Node 22) fetches the H.264 stream and the event feed from your RideWatch server through a local SOCKS5 proxy (Tailscale, ...), picks the camera that matters (rings, people, the latest detection), decodes the events' JPEG thumbnails (jpeg-js) and serves /run/jap-ridewatch/ctl.sock to the app; camdec decodes the stream with the MSDK into the mgu-render video layer (/dev/shm/mgu-video-ridewatch)",
   "requires": {
     "mgu-deploy": "0.7.0",
     "jap-node22": "22.23.4"

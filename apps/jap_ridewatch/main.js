@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JustAnotherPU
 /**
  * RideWatch (jap_ridewatch) - the UniFi Protect cameras on the whole screen, parked. The jap-ridewatch tool does the work
- * (ridewatchd.js, Node 22: the stream from the RideWatch server, camdec decoding it into /dev/shm/jap-video-ridewatch, the
+ * (ridewatchd.js, Node 22: the stream from the RideWatch server, camdec decoding it into /dev/shm/mgu-video-ridewatch, the
  * event feed and the choice of the hero camera); this app is its face over ctl.js. The server draws the pictures at
  * exactly the size asked here (rect(): the kit's placement), so the stream's pixels are the screen's: the overlay is
  * drawn in screen px (xf(1, 0, 0)), the targets in the kit's page px.
@@ -47,7 +47,7 @@ const { RenderClient } = require('./mgu_render_client');
 const F = require('./frame');
 
 const W = 1600, H = 520;                 // the kit's page ("fill": scaled over the whole screen)
-const VID = 1, VPATH = process.env.JAP_RIDEWATCH_VIDEO || '/dev/shm/jap-video-ridewatch';
+const VID = 1, VPATH = process.env.JAP_RIDEWATCH_VIDEO || '/dev/shm/mgu-video-ridewatch';
 const KEEPALIVE_MS = 500;                // the renderer hides an app silent for 3 s
 const POOL0 = 8, POOL = 24;              // picture ids for the timeline's thumbs (the renderer holds 64 an app)
 const LIT = { literal: true }, BOLD = { literal: true, font: 'bold' };
