@@ -1,10 +1,10 @@
 {
-  "id": "jap_cams",
-  "title": "Cameras",
-  "description": "Cameras: your UniFi Protect cameras on the whole screen while parked: the camera that matters big (a ring, a person, the latest detection), the others beside it, a timeline of what happened with each event's clip, any camera alone. The stream comes from your jap-cams server and is decoded by the jap-cams tool into the mgu-render video layer",
-  "version": "0.3.0",
+  "id": "jap_ridewatch",
+  "title": "RideWatch",
+  "description": "RideWatch: your UniFi Protect cameras on the whole screen while parked: the camera that matters big (a ring, a person, the latest detection), the others beside it, a timeline of what happened with each event's clip, any camera alone. The stream comes from your RideWatch server and is decoded by the jap-ridewatch tool into the mgu-render video layer",
+  "version": "0.3.1",
   "vendor": "custom",
-  "loggingId": "CAMS",
+  "loggingId": "RWAT",
   "signals": {
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusCarSpeed2": "rs"
@@ -14,7 +14,7 @@
     {
       "name": "VIEW",
       "kind": "canvas",
-      "title": "Cameras",
+      "title": "RideWatch",
       "hmi": false,
       "fill": true,
       "bg": "#000000",
@@ -28,7 +28,7 @@
     {
       "name": "CAM",
       "kind": "canvas",
-      "title": "Cameras",
+      "title": "RideWatch",
       "chrome": false
     }
   ],
@@ -41,7 +41,7 @@
     },
     {
       "key": "server1",
-      "label": "Server IP, 1st number (the jap-cams server's address: private network or Tailscale 100.x)",
+      "label": "Server IP, 1st number (the RideWatch server's address: private network or Tailscale 100.x)",
       "type": "number",
       "default": 0,
       "steps": [

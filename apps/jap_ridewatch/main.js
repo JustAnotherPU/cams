@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 JustAnotherPU
 /**
- * Cameras (jap_cams) - the UniFi Protect cameras on the whole screen, parked. The jap-cams tool does the work
- * (camsd.js, Node 22: the stream from the jap-cams server, camdec decoding it into /dev/shm/jap-video-cams, the
+ * RideWatch (jap_ridewatch) - the UniFi Protect cameras on the whole screen, parked. The jap-ridewatch tool does the work
+ * (ridewatchd.js, Node 22: the stream from the RideWatch server, camdec decoding it into /dev/shm/jap-video-ridewatch, the
  * event feed and the choice of the hero camera); this app is its face over ctl.js. The server draws the pictures at
  * exactly the size asked here (rect(): the kit's placement), so the stream's pixels are the screen's: the overlay is
  * drawn in screen px (xf(1, 0, 0)), the targets in the kit's page px.
@@ -47,7 +47,7 @@ const { RenderClient } = require('./mgu_render_client');
 const F = require('./frame');
 
 const W = 1600, H = 520;                 // the kit's page ("fill": scaled over the whole screen)
-const VID = 1, VPATH = process.env.JAP_CAMS_VIDEO || '/dev/shm/jap-video-cams';
+const VID = 1, VPATH = process.env.JAP_RIDEWATCH_VIDEO || '/dev/shm/jap-video-ridewatch';
 const KEEPALIVE_MS = 500;                // the renderer hides an app silent for 3 s
 const POOL0 = 8, POOL = 24;              // picture ids for the timeline's thumbs (the renderer holds 64 an app)
 const LIT = { literal: true }, BOLD = { literal: true, font: 'bold' };
@@ -98,7 +98,7 @@ mgu.run({
         let sent = null, dirty = true;           // sent: the last view asked ("spot 1920x720"), 'stop' or null
         let heroT = 0, banner = null;            // when the hero changed (its name fades in); the live event's banner
         const ctl = new Ctl(log);
-        // the settings the service needs (camsd.js configure()): sent first, so the list goes to the right server
+        // the settings the service needs (ridewatchd.js configure()): sent first, so the list goes to the right server
         const num = (k) => (Number.isInteger(settings.get(k)) ? settings.get(k) : 0);
         const config = () => ctl.send({ cmd: 'config', host: [num('server1'), num('server2'), num('server3'), num('server4')], port: num('port') || 18640,
             socks: num('socks') || 1065, socksFallback: num('socksFallback'), lat: num('lat'), lon: num('lon') });
@@ -107,7 +107,7 @@ mgu.run({
         const isEv = (e) => e && typeof e.id === 'string' && Number.isInteger(e.cam) && !!TYPE[e.type] && typeof e.ts === 'number';
         ctl.on('msg', safe('ctl msg', (m) => {
             if (m.ev === 'state') {
-                if (m.state !== st.state) log.info('jap-cams: ' + m.state + (m.msg ? ' (' + m.msg + ')' : ''));
+                if (m.state !== st.state) log.info('jap-ridewatch: ' + m.state + (m.msg ? ' (' + m.msg + ')' : ''));
                 st.state = m.state; st.view = m.view; st.msg = m.msg || null;
                 if ('shows' in m) st.shows = m.shows;
                 if (m.state === 'playing') { st.pic = true; if (!st.cams.length) ctl.send({ cmd: 'list' }); }
@@ -137,7 +137,7 @@ mgu.run({
                 const buf = typeof m.rgba === 'string' ? Buffer.from(m.rgba, 'base64') : null;
                 if (!buf || m.w !== 160 || m.h !== 90 || buf.length !== 160 * 90 * 4 || !st.events.some((e) => e.id === m.id)) return;
                 thumbs[m.id] = { w: m.w, h: m.h, buf };
-            } else if (m.ev === 'error') log.warn('jap-cams: ' + m.cmd + ': ' + m.msg);
+            } else if (m.ev === 'error') log.warn('jap-ridewatch: ' + m.cmd + ': ' + m.msg);
             else if (m.ev === 'stats') return;
             dirty = true;
         }));
@@ -305,7 +305,7 @@ mgu.run({
         // the state line over the picture (null: nothing to say)
         function note() {
             if (flash && Date.now() - flash.t < 5000) return flash.s;
-            if (!st.up) return 'The jap-cams service is not answering';
+            if (!st.up) return 'The RideWatch service is not answering';
             if (moving()) return 'Available only while parked';
             if (st.state === 'error') return st.msg || 'Error';
             if ((st.state === 'connecting' || st.state === 'idle') && !overlay()) return 'Connecting…';
@@ -554,7 +554,7 @@ mgu.run({
                 if (cv.own && cv.place) anim = drawView(cv);
                 else {
                     cv.clear('#000000');
-                    cv.text('Cameras needs the GPU renderer (mgu-render)', W / 2, H / 2, 30, '#ffffff', Object.assign({ align: 'center' }, LIT));
+                    cv.text('RideWatch needs the GPU renderer (mgu-render)', W / 2, H / 2, 30, '#ffffff', Object.assign({ align: 'center' }, LIT));
                 }
                 last = cv;
             }
@@ -738,6 +738,6 @@ mgu.run({
         setInterval(safe('sync', sync), 250);
         ui.onVisible(safe('visible', (n, on) => { if (n === 'CAM' && !on) clip = null; dirty = true; camRec = null; sync(); }));   // (left CAM: the clip is done)
         if (ui.onFocus) ui.onFocus(safe('focus', () => sync()));
-        log.info('cams app started');
+        log.info('ridewatch app started');
     },
 });

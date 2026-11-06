@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- Renamed to RideWatch: the app is `jap_ridewatch`, its service `jap-ridewatch`, and the server's user, folders and
+  units say `ridewatch` too. Install the server again with `server/install.sh`, then set the Server IP in the app
+  and add the car's new code.
+- README: which cameras work with what (Protect, other RTSP cameras).
+
 ## 0.3.0
 
 First public release.

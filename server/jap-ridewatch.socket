@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 [Unit]
-Description=jap-cams: camera streams for the Cameras car app (one ffmpeg per connection)
+Description=jap-ridewatch: camera streams for the RideWatch car app (one ffmpeg per connection)
 
 [Socket]
 # install.sh puts the address it was given here (0.0.0.0: every interface). Keep it off the internet: the car comes

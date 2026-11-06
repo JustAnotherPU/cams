@@ -1,8 +1,8 @@
 'use strict';
 /**
- * ctl.js - the app's end of the jap-cams service (camsd.js) control socket: JSON lines both ways.
+ * ctl.js - the app's end of the jap-ridewatch service (ridewatchd.js) control socket: JSON lines both ways.
  *
- *   const ctl = new Ctl(log);      // /run/jap-cams/ctl.sock, or JAP_CAMS_CTL
+ *   const ctl = new Ctl(log);      // /run/jap-ridewatch/ctl.sock, or JAP_RIDEWATCH_CTL
  *   ctl.on('up', () => ...); ctl.on('down', () => ...); ctl.on('msg', (m) => ...);   // m: a daemon event ({ ev: ... })
  *   ctl.send({ cmd: 'status' });   // false while not connected (nothing is queued)
  *
@@ -11,7 +11,7 @@
 const net = require('net');
 const EventEmitter = require('events');
 
-const SOCK = process.env.JAP_CAMS_CTL || '/run/jap-cams/ctl.sock';
+const SOCK = process.env.JAP_RIDEWATCH_CTL || '/run/jap-ridewatch/ctl.sock';
 const MIN_MS = 500, MAX_MS = 10000, MAX_LINE = 1 << 20;
 
 class Ctl extends EventEmitter {

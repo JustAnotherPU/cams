@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 [Unit]
-Description=jap-cams: UniFi Protect camera stream service (ctl socket for the Cameras app; feeds the camdec decoder)
+Description=jap-ridewatch: UniFi Protect camera stream service (ctl socket for the RideWatch app; feeds the camdec decoder)
 RequiresMountsFor=/var/opt
 After=local-fs.target
 
@@ -12,15 +12,15 @@ Group=tm_oap_app
 SupplementaryGroups=video
 # '+' runs as root: the deploy tool installs everything 0:0; nobody needs its own state dir and must own the
 # server.json put there (token: 0600)
-ExecStartPre=-+/bin/sh -c 'mkdir -p /var/opt/jap-cams/state && chown nobody:tm_oap_app /var/opt/jap-cams/state && chmod 0700 /var/opt/jap-cams/state && if [ -f /var/opt/jap-cams/state/server.json ]; then chown nobody /var/opt/jap-cams/state/server.json && chmod 0600 /var/opt/jap-cams/state/server.json; fi'
+ExecStartPre=-+/bin/sh -c 'mkdir -p /var/opt/jap-ridewatch/state && chown nobody:tm_oap_app /var/opt/jap-ridewatch/state && chmod 0700 /var/opt/jap-ridewatch/state && if [ -f /var/opt/jap-ridewatch/state/server.json ]; then chown nobody /var/opt/jap-ridewatch/state/server.json && chmod 0600 /var/opt/jap-ridewatch/state/server.json; fi'
 # a frame file left by another owner (root, a test) makes camdec exit 2 as nobody (/dev/shm is sticky)
-ExecStartPre=-+/bin/sh -c '[ -e /dev/shm/jap-video-cams ] && [ "$(stat -c %%U /dev/shm/jap-video-cams)" != nobody ] && rm -f /dev/shm/jap-video-cams; true'
-Environment=JAP_CAMS_CONF=/var/opt/jap-cams/state/server.json
-Environment=JAP_CAMS_CTL=/run/jap-cams/ctl.sock
-Environment=JAP_CAMDEC=/var/opt/jap-cams/current/camdec
-Environment=JAP_CAMS_VIDEO=/dev/shm/jap-video-cams
-ExecStart=/var/opt/jap-node22/current/bin/node /var/opt/jap-cams/current/camsd.js
-RuntimeDirectory=jap-cams
+ExecStartPre=-+/bin/sh -c '[ -e /dev/shm/jap-video-ridewatch ] && [ "$(stat -c %%U /dev/shm/jap-video-ridewatch)" != nobody ] && rm -f /dev/shm/jap-video-ridewatch; true'
+Environment=JAP_RIDEWATCH_CONF=/var/opt/jap-ridewatch/state/server.json
+Environment=JAP_RIDEWATCH_CTL=/run/jap-ridewatch/ctl.sock
+Environment=JAP_CAMDEC=/var/opt/jap-ridewatch/current/camdec
+Environment=JAP_RIDEWATCH_VIDEO=/dev/shm/jap-video-ridewatch
+ExecStart=/var/opt/jap-node22/current/bin/node /var/opt/jap-ridewatch/current/ridewatchd.js
+RuntimeDirectory=jap-ridewatch
 # 0755 like Moonride's: the socket itself is 0660, so only the app's group gets in
 RuntimeDirectoryMode=0755
 # the daemon (~40 MB) + camdec (MSDK surfaces for one 1920x720 stream) + at most 4 MB held before an IDR;
@@ -31,7 +31,7 @@ CPUQuota=150%
 Restart=on-failure
 # 3 s keeps clear of systemd's 5-starts-in-10-s limit.
 RestartSec=3
-# SIGTERM: stream closed, camdec's stdin ended (killed after 1 s), exit (1.2 s cap in camsd.js).
+# SIGTERM: stream closed, camdec's stdin ended (killed after 1 s), exit (1.2 s cap in ridewatchd.js).
 TimeoutStopSec=5
 # 1, not 0: with a pipe core_pattern the kernel still pipes a core at limit 0 (as in RideTube).
 LimitCORE=1

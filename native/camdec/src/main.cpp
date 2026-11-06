@@ -2,7 +2,7 @@
 // Copyright (C) 2026 JustAnotherPU
 /* camdec: live H.264 from stdin -> mgu-render's MGVF video file (README.md).
  *
- *   camdec --out /dev/shm/jap-video-cams [--log FILE]
+ *   camdec --out /dev/shm/jap-video-ridewatch [--log FILE]
  *
  * Two threads. The main thread reads stdin, frames access units (feeder.h)
  * and decodes them on the GPU as they arrive (decoder_msdk.h: no VPP, NV12 in
@@ -83,7 +83,7 @@ void log_line(const std::string &msg)
     }
 }
 
-/* stdout is a pipe to jap-cams daemon: one write per line (< PIPE_BUF, so lines from
+/* stdout is a pipe to jap-ridewatch daemon: one write per line (< PIPE_BUF, so lines from
  * both threads never interleave), never buffered. */
 void emit(const std::string &json)
 {

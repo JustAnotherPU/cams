@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 JustAnotherPU
 /**
- * camsd.js - the jap-cams service on the car (Node 22, jap-node22). Serves ctl.sock to the Cameras app (Node 8),
- * fetches the H.264 stream from the jap-cams server through a local SOCKS5 proxy (the car has no TUN: a tunnel such
+ * ridewatchd.js - the jap-ridewatch service on the car (Node 22, jap-node22). Serves ctl.sock to the RideWatch app (Node 8),
+ * fetches the H.264 stream from the RideWatch server through a local SOCKS5 proxy (the car has no TUN: a tunnel such
  * as Tailscale or WireGuard offers one on 127.0.0.1) and feeds it to camdec's stdin (camdec writes the MGVF frames
  * the app's layer shows). While an app is connected it also holds the server's event feed and picks the spot
  * view's hero camera.
  *
  * Environment (defaults are the car's):
- *   JAP_CAMS_CONF   /var/opt/jap-cams/state/server.json (0600), written here: {"host","port","socks":"127.0.0.1:1065",
+ *   JAP_RIDEWATCH_CONF   /var/opt/jap-ridewatch/state/server.json (0600), written here: {"host","port","socks":"127.0.0.1:1065",
  *                   optional "socksFallback" (a second SOCKS proxy, tried when "socks" fails, then used first for a
  *                   minute), "lat", "lon" (night = sunset..sunrise; none: always day), "token" (the car's code, made
  *                   here at the first start), optional "homeSsid" (the home Wi-Fi, by hand: "car at home")}.
  *                   The app's settings set host, port, socks, socksFallback, lat and lon ({"cmd":"config"}).
- *   JAP_CAMS_CTL    /run/jap-cams/ctl.sock               MGU_UPLINK /run/mgu-uplink/status.json (mgu-uplink's Wi-Fi state)
- *   JAP_CAMDEC      /var/opt/jap-cams/current/camdec      JAP_CAMS_VIDEO /dev/shm/jap-video-cams
+ *   JAP_RIDEWATCH_CTL    /run/jap-ridewatch/ctl.sock               MGU_UPLINK /run/mgu-uplink/status.json (mgu-uplink's Wi-Fi state)
+ *   JAP_CAMDEC      /var/opt/jap-ridewatch/current/camdec      JAP_RIDEWATCH_VIDEO /dev/shm/jap-video-ridewatch
  *
  * App -> daemon: {"cmd":"list"} {"cmd":"view","view":"spot"|"mosaic"|i,"rect":"WxH"} {"cmd":"pick","cam":i}
  *   {"cmd":"config","host":[a,b,c,d],"port","socks","socksFallback","lat","lon"} (0.0.0.0 keeps the address in
@@ -59,11 +59,11 @@ const net = require('net');
 const socks = require('./socks');
 const decodeJpeg = require('./vendor/jpeg-js/decoder.js');
 
-const CONF = process.env.JAP_CAMS_CONF || '/var/opt/jap-cams/state/server.json';
+const CONF = process.env.JAP_RIDEWATCH_CONF || '/var/opt/jap-ridewatch/state/server.json';
 const ORDER = require('path').join(require('path').dirname(CONF), 'order.json');   // the state dir: nobody's, 0700
-const CTL = process.env.JAP_CAMS_CTL || '/run/jap-cams/ctl.sock';
-const BIN = process.env.JAP_CAMDEC || '/var/opt/jap-cams/current/camdec';
-const VIDEO = process.env.JAP_CAMS_VIDEO || '/dev/shm/jap-video-cams';
+const CTL = process.env.JAP_RIDEWATCH_CTL || '/run/jap-ridewatch/ctl.sock';
+const BIN = process.env.JAP_CAMDEC || '/var/opt/jap-ridewatch/current/camdec';
+const VIDEO = process.env.JAP_RIDEWATCH_VIDEO || '/dev/shm/jap-video-ridewatch';
 const UPLINK = process.env.MGU_UPLINK || '/run/mgu-uplink/status.json';
 const BACKOFF = [1000, 2000, 4000, 8000, 10000];
 const FIRST_MS = 10000;          // connect to first IDR (measured 0.2 s cam, 0.5 s mosaic, 0.8-1.4 s spot)

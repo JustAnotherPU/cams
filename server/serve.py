@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 JustAnotherPU
-"""jap-cams server: one H.264 stream of the UniFi Protect cameras, encoded at exactly the car's rect.
+"""RideWatch server: one H.264 stream of the UniFi Protect cameras, encoded at exactly the car's rect.
 
-Runs per connection under systemd socket activation (jap-cams.socket, Accept=yes): stdin/stdout = the TCP socket.
+Runs per connection under systemd socket activation (jap-ridewatch.socket, Accept=yes): stdin/stdout = the TCP socket.
 Request, one line:  <token> mosaic2 <W>x<H>            -> one JSON line {"ev":"layout",...,"tiles":[{i,name,x,y,w,h}]}, then as mosaic
                     <token> list                      -> JSON [{"i":0,"name":"Garage","shape","w","h","roles"}, ...] and close
                     <token> spot <hero> [o=<i,i,..>] <W>x<H>  -> layout line, then the hero big + the others in the pane
@@ -17,7 +17,7 @@ Request, one line:  <token> mosaic2 <W>x<H>            -> one JSON line {"ev":"l
 <token>: a car's code (cams.json "cars", added with configure.py --add-car). A wrong one: closed without a word.
 The stream runs until the client closes (a clip: until it ends). No B-frames, SPS/PPS before every IDR, 1 s GOP: a decoder
 joining or recovering waits at most 1 s.
-Config /opt/jap-cams/cams.json (0600, written by configure.py):
+Config /opt/jap-ridewatch/cams.json (0600, written by configure.py):
   {"cars": ["<code>", ...], "protect": {"host", "username", "password"},
    "cams": [{"name", "label", "protectId", "roles": ["door"|"garage"|"day"|"night"],
              "channels": [{"id", "w", "h", "fps", "alias", "url"?}]}]}
@@ -25,7 +25,7 @@ Config /opt/jap-cams/cams.json (0600, written by configure.py):
 """
 import json, math, os, re, secrets, signal, subprocess, sys, tempfile
 
-CONF = os.environ.get('JAP_CAMS_CONF', '/opt/jap-cams/cams.json')
+CONF = os.environ.get('JAP_RIDEWATCH_CONF', '/opt/jap-ridewatch/cams.json')
 URL = 'rtsps://{}:7441/{}'  # Protect's RTSPS, on the Protect host (use())
 HOST = ['']
 ROLES = ('door', 'garage', 'day', 'night')
@@ -194,7 +194,7 @@ def main():
         srcs = spot_pullers(cams, lo, 0)
         fps = srcs[0][0].get('fps', 30)                # the hero's own rate: it is the picture that is watched
         sys.stdout.write(json.dumps(lo) + '\n'); sys.stdout.flush()
-        d = tempfile.mkdtemp(prefix='jap-cams-')
+        d = tempfile.mkdtemp(prefix='jap-ridewatch-')
         fifos = []
         jobs = []
         rects = [lo['heroRect']] + lo['tiles']
@@ -214,7 +214,7 @@ def main():
     fifos = None
     if view == 'mosaic':
         tw, th, srcs = mosaic_sources(cams, W, H)
-        d = tempfile.mkdtemp(prefix='jap-cams-')      # PrivateTmp=yes in the unit: gone when the stream stops
+        d = tempfile.mkdtemp(prefix='jap-ridewatch-')      # PrivateTmp=yes in the unit: gone when the stream stops
         fifos, jobs, still = [], [], placeholder(tw, th, 'yuv420p', 28)
         for k, ch in enumerate(srcs):
             f = os.path.join(d, '%d.yuv' % k); os.mkfifo(f, 0o600); fifos.append(f)
@@ -222,12 +222,12 @@ def main():
         run_tiles(jobs, MOSAIC_FPS, command(cams, view, W, H, fifos), hold=False)   # (no main picture)
     ch = channel(cams[view], W, H, False)             # one camera: same relay, black until its keyframe
     fps = ch.get('fps', 30)
-    d = tempfile.mkdtemp(prefix='jap-cams-'); f = os.path.join(d, '0.yuv'); os.mkfifo(f, 0o600)
+    d = tempfile.mkdtemp(prefix='jap-ridewatch-'); f = os.path.join(d, '0.yuv'); os.mkfifo(f, 0o600)
     run_tiles([(raw_puller(ch, 'pipe:1', fit(ch['w'], ch['h'], W, H), 'yuv420p', fps), f, placeholder(W, H, 'yuv420p', 16))],
               fps, command(cams, view, W, H, [f]))
 
 
-STATE = os.environ.get('JAP_CAMS_STATE', '/var/lib/jap-cams')
+STATE = os.environ.get('JAP_RIDEWATCH_STATE', '/var/lib/jap-ridewatch')
 
 
 def event_rows(path):
@@ -275,7 +275,7 @@ CLIP_PRE, CLIP_POST, CLIP_MAX = 5000, 15000, 90000  # ms before the first hit, a
 
 
 class ProtectError(Exception):
-    """args: (code, detail): the code goes to the car (camsd words it), the detail to the journal; neither holds secrets"""
+    """args: (code, detail): the code goes to the car (ridewatchd words it), the detail to the journal; neither holds secrets"""
 
 
 def http(method, url, headers, body=None, timeout=10, out=None):
@@ -296,9 +296,9 @@ def http(method, url, headers, body=None, timeout=10, out=None):
 
 
 def base(conf):
-    """Protect's address: https://<protect.host> (JAP_CAMS_PROTECT_URL overrides it, for the selftests)"""
-    if os.environ.get('JAP_CAMS_PROTECT_URL'):
-        return os.environ['JAP_CAMS_PROTECT_URL']
+    """Protect's address: https://<protect.host> (JAP_RIDEWATCH_PROTECT_URL overrides it, for the selftests)"""
+    if os.environ.get('JAP_RIDEWATCH_PROTECT_URL'):
+        return os.environ['JAP_RIDEWATCH_PROTECT_URL']
     h = (conf.get('protect') or {}).get('host')
     if not h or not re.fullmatch(r'[A-Za-z0-9.:\[\]-]+', str(h)):
         raise ProtectError('config', 'cams.json has no valid "protect": {"host"}')
@@ -381,7 +381,7 @@ def clip(conf, eid, W, H, out=None, now=None):
 
     def say(o):
         out.write((json.dumps(o) + '\n').encode()); out.flush()
-    d = tempfile.mkdtemp(prefix='jap-cams-')
+    d = tempfile.mkdtemp(prefix='jap-ridewatch-')
     try:
         row = next((e for e in event_rows(os.path.join(STATE, 'events.json')) if e.get('id') == eid), None)
         if row is None or not isinstance(row.get('cam'), int) or not 0 <= row['cam'] < len(conf['cams']):
@@ -636,7 +636,7 @@ def relay(src, fifo, still, fps, real=None):
 # The first IDR waits for the main picture's camera (job 0): the car keeps showing the view before until that IDR,
 # so a switch goes from the old picture straight to the new one, never through the dark placeholder (Protect's first
 # keyframe: 4.4 s measured). Past HOLD_S the view starts anyway (a dead camera: its placeholder); the car
-# gives up on a view with no IDR after 10 s (camsd FIRST_MS).
+# gives up on a view with no IDR after 10 s (ridewatchd FIRST_MS).
 HOLD_S = 7
 
 
@@ -802,7 +802,7 @@ def clip_selftest():
             self.reply(200, P['mp4'])
     srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Fake)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
-    os.environ['JAP_CAMS_PROTECT_URL'] = 'http://127.0.0.1:%d' % srv.server_address[1]
+    os.environ['JAP_RIDEWATCH_PROTECT_URL'] = 'http://127.0.0.1:%d' % srv.server_address[1]
     now = 1762300000000
     json.dump([{'id': 'a' * 12, 'cam': 1, 'label': 'Garage', 'type': 'person', 'ts': now - 60000, 'first': now - 70000, 'count': 2, 'thumb': True},
                {'id': 'b' * 12, 'cam': 2, 'label': 'Attic', 'type': 'animal', 'ts': now - 5000, 'first': now - 5000, 'count': 1, 'thumb': False}],
@@ -849,7 +849,7 @@ def clip_selftest():
     assert cams[0]['protectId'] == 'c0' and cams[0]['channels'] == [{'id': 0, 'w': 1600, 'h': 1200, 'fps': 30, 'alias': 'dOoR0'}], cams[0]
     assert [ch['alias'] for ch in cams[1]['channels']] == ['gA1', 'gA2'] and cams[1]['channels'][1]['fps'] == 30, cams[1]
     assert off == ['Door: Medium', 'Garage: bad', 'Shed: High'], off
-    os.environ.pop('JAP_CAMS_PROTECT_URL')
+    os.environ.pop('JAP_RIDEWATCH_PROTECT_URL')
     try:
         base({'protect': {'host': 'x/y'}}); assert False
     except ProtectError as e:

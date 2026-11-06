@@ -39,7 +39,7 @@ static std::vector<uint8_t> hex(const char *h)
     return v;
 }
 
-/* SPS of the live server's streams (cams cam1.h264 and mosaic.h264, the same
+/* SPS of the RideWatch server's streams (cam1.h264 and mosaic.h264, the same
  * bytes): x264 High, 1920x720, VUI num_units_in_tick 1, time_scale 60. */
 static const char kSpsCam[] = "67640028acb603c02dd80b50101014000003000400000300f23c60cb80";
 static const char kPpsCam[] = "68eac1bcb0";

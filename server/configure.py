@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 JustAnotherPU
-"""jap-cams setup: writes /opt/jap-cams/cams.json (0600, owned by the service user) from what Protect says.
+"""jap-ridewatch setup: writes /opt/jap-ridewatch/cams.json (0600, owned by the service user) from what Protect says.
 
-    sudo python3 /opt/jap-cams/configure.py                    asks for Protect and the cameras' roles (again: Enter
+    sudo python3 /opt/jap-ridewatch/configure.py                    asks for Protect and the cameras' roles (again: Enter
                                                                keeps each answer; new cameras are found)
-    sudo python3 /opt/jap-cams/configure.py --add-car CODE     lets a car in (the code its app shows)
-    sudo python3 /opt/jap-cams/configure.py --remove-car CODE
-    sudo python3 /opt/jap-cams/configure.py --cars             lists the cars' codes
+    sudo python3 /opt/jap-ridewatch/configure.py --add-car CODE     lets a car in (the code its app shows)
+    sudo python3 /opt/jap-ridewatch/configure.py --remove-car CODE
+    sudo python3 /opt/jap-ridewatch/configure.py --cars             lists the cars' codes
 
 Protect: its address (the console, e.g. 192.0.2.1) and a local user with the View Only role (Protect, Settings,
 Admins and Users). The cameras and their RTSPS channels come from Protect's camera list; a channel with RTSP off is
@@ -20,8 +20,8 @@ import getpass, json, os, pwd, re, sys, tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import serve  # noqa: E402
 
-CONF = os.environ.get('JAP_CAMS_CONF', '/opt/jap-cams/cams.json')
-USER = 'japcams'
+CONF = os.environ.get('JAP_RIDEWATCH_CONF', '/opt/jap-ridewatch/cams.json')
+USER = 'japridewatch'
 CODE = re.compile(r'[A-Z0-9]{4}(-[A-Z0-9]{4}){3}')
 
 
@@ -83,8 +83,8 @@ def setup():
     if pw:
         p['password'] = pw
     conf['protect'] = p
-    with tempfile.TemporaryDirectory(prefix='jap-cams-setup-') as tmp:   # no root-owned Protect session left behind
-        os.environ['JAP_CAMS_STATE'] = serve.STATE = tmp
+    with tempfile.TemporaryDirectory(prefix='jap-ridewatch-setup-') as tmp:   # no root-owned Protect session left behind
+        os.environ['JAP_RIDEWATCH_STATE'] = serve.STATE = tmp
         try:
             found, off = serve.discover(conf)
         except serve.ProtectError as e:
@@ -129,7 +129,7 @@ def cars(cmd, code=None):
         print('\n'.join(have) or '(none)'); return
     code = (code or '').strip().upper()
     if not CODE.fullmatch(code):
-        sys.exit('a car code looks like ABCD-EFGH-JKLM-NPQR (the Cameras app shows it)')
+        sys.exit('a car code looks like ABCD-EFGH-JKLM-NPQR (the RideWatch app shows it)')
     if cmd == '--add-car' and code not in have:
         have.append(code)
     if cmd == '--remove-car':

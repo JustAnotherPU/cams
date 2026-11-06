@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 JustAnotherPU
-"""measure a view from the jap-cams server: time to first byte / first IDR / first real picture, arrival jitter, bitrate.
+"""measure a view from the RideWatch server: time to first byte / first IDR / first real picture, arrival jitter, bitrate.
 usage: measure.py <host> <car code> "mosaic 1920x720" [seconds] [out.h264]     (add the code with configure.py --add-car)
 picture_s: the first frame whose picture (the hero for spot) is no longer the server's flat placeholder, i.e. the
 camera's own first keyframe is in (the first IDR is the placeholder's); tiles_s: [p50, max, real/all] of the same per

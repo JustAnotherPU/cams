@@ -11,11 +11,11 @@ const [dir, base] = process.argv.slice(2);
 if (!dir || !/^https:\/\//.test(base || '')) { console.error('usage: node release/catalog.js <folder> <https base url>'); process.exit(2); }
 const AUTHOR = 'JustAnotherPU';
 const META = {
-    jap_cams: { kind: 'app', title: 'Cameras', icon: 'jap_cams.png',
-        description: 'Your UniFi Protect cameras on the iDrive 7 screen, parked only by default: the camera that matters big, the others beside it, a timeline of detections with their clips. Needs your own jap-cams server (Linux, ffmpeg) and a tunnel to it.',
-        requires: (v) => ({ 'jap-cams': v['jap-cams'], 'mgu-render': '0.6.8' }) },
-    'jap-cams': { kind: 'tool', title: 'Cameras service',
-        description: "The Cameras app's background service: the stream and the events from your jap-cams server through a local SOCKS5 proxy, the H.264 decoder (Intel MSDK) into mgu-render",
+    jap_ridewatch: { kind: 'app', title: 'RideWatch', icon: 'jap_ridewatch.png',
+        description: 'Your UniFi Protect cameras on the iDrive 7 screen, parked only by default: the camera that matters big, the others beside it, a timeline of detections with their clips. Needs your own RideWatch server (Linux, ffmpeg) and a tunnel to it.',
+        requires: (v) => ({ 'jap-ridewatch': v['jap-ridewatch'], 'mgu-render': '0.6.8' }) },
+    'jap-ridewatch': { kind: 'tool', title: 'RideWatch service',
+        description: "The RideWatch app's background service: the stream and the events from your RideWatch server through a local SOCKS5 proxy, the H.264 decoder (Intel MSDK) into mgu-render",
         // jap-node22 comes from the JustAnotherPU/mgu-apps source (the Store resolves requires from any source)
         requires: () => ({ 'mgu-deploy': '0.7.0', 'jap-node22': '22.23.4' }) },
 };

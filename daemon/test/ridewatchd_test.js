@@ -1,10 +1,10 @@
 'use strict';
-// jap-cams daemon offline test: a fake SOCKS5 + jap-cams server (serve.py's protocol, mosaic2's layout line, a few bytes of
+// jap-ridewatch daemon offline test: a fake SOCKS5 + RideWatch server (serve.py's protocol, mosaic2's layout line, a few bytes of
 // fake Annex-B) and a fake camdec (test/fake_camdec.js). Covers list, view, switch, drop + reconnect, last client gone,
 // and concept A: the event feed, the hero (chooseHero, isNight), spot streams following the hero, pick, ring, thumbs,
 // an event's clip (played once -> ended, never reconnected; a server error -> its message), the app's config and
 // the car's code.
-//   node test/camsd_test.js            (Node 22 like the car: docker run --rm --network none -v $PWD:/w -w /w node:22.12.0-alpine node test/camsd_test.js)
+//   node test/ridewatchd_test.js            (Node 22 like the car: docker run --rm --network none -v $PWD:/w -w /w node:22.12.0-alpine node test/ridewatchd_test.js)
 const assert = require('assert');
 const cp = require('child_process');
 const fs = require('fs');
@@ -12,7 +12,7 @@ const net = require('net');
 const os = require('os');
 const path = require('path');
 
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'camsd-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ridewatchd-'));
 const CTL = path.join(tmp, 'ctl.sock'), CONF = path.join(tmp, 'server.json'), DLOG = path.join(tmp, 'camdec.log');
 const TOKEN = 'tok-' + Math.random().toString(36).slice(2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -86,9 +86,9 @@ const server = net.createServer((s) => {
 /* ---- the daemon, and an app on ctl.sock ---- */
 let daemon, out = '';
 function startDaemon(port) {
-    daemon = cp.spawn(process.execPath, [path.join(__dirname, '..', 'camsd.js')], {
-        env: Object.assign({}, process.env, { JAP_CAMS_CONF: CONF, JAP_CAMS_CTL: CTL, JAP_CAMDEC: path.join(__dirname, 'fake_camdec.js'),
-            JAP_CAMS_VIDEO: path.join(tmp, 'jap-video-cams'), MGU_UPLINK: path.join(tmp, 'status.json'), FAKE_CAMDEC_LOG: DLOG, FAKE_STATS_MS: '300' }),
+    daemon = cp.spawn(process.execPath, [path.join(__dirname, '..', 'ridewatchd.js')], {
+        env: Object.assign({}, process.env, { JAP_RIDEWATCH_CONF: CONF, JAP_RIDEWATCH_CTL: CTL, JAP_CAMDEC: path.join(__dirname, 'fake_camdec.js'),
+            JAP_RIDEWATCH_VIDEO: path.join(tmp, 'jap-video-ridewatch'), MGU_UPLINK: path.join(tmp, 'status.json'), FAKE_CAMDEC_LOG: DLOG, FAKE_STATS_MS: '300' }),
         stdio: ['ignore', 'pipe', 'pipe'],
     });
     daemon.stdout.on('data', (d) => { out += d; });
@@ -263,7 +263,7 @@ const push = (e) => srv.evs.filter((s) => !s.destroyed).forEach((s) => s.write(J
     console.log('ok first start (code made, 0600, not logged), config from the app, refused until added');
 
     /* ---- concept A ---- */
-    const { chooseHero, isNight, scale } = require('../camsd.js');
+    const { chooseHero, isNight, scale } = require('../ridewatchd.js');
     assert.strictEqual(isNight(new Date('2026-11-05T12:00:00Z'), 51, 0), false, '51N 0E noon: day');
     assert.strictEqual(isNight(new Date('2026-11-05T17:30:00Z'), 51, 0), true, '51N 0E 17:30 UTC in November: night');
     assert.strictEqual(isNight(new Date('2026-06-21T19:30:00Z'), 51, 0), false, '51N 0E 19:30 UTC in June: day');
@@ -294,7 +294,7 @@ const push = (e) => srv.evs.filter((s) => !s.destroyed).forEach((s) => s.write(J
     assert.strictEqual(H([], null, null, true).split(' ')[0], '0', 'night with a night camera');
     const dayOnly = CAMS.map((x) => Object.assign({}, x, { roles: x.i === 3 ? ['day'] : [] }));
     assert.strictEqual(chooseHero([], dayOnly, null, null, now, true).hero, 3, 'night without a night camera: the day one');
-    const { newCode } = require('../camsd.js');
+    const { newCode } = require('../ridewatchd.js');
     assert.ok(/^([A-HJ-NP-Z2-9]{4}-){3}[A-HJ-NP-Z2-9]{4}$/.test(newCode()) && newCode() !== newCode(), 'car code: 4 x 4, no 0/O/1/I');
     const sc = scale({ width: 4, height: 2, data: Buffer.from([0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 255, 255, 0]) });
     assert.strictEqual(sc.length, 160 * 90 * 4, 'thumbs are 160x90 RGBA');
@@ -389,7 +389,7 @@ const push = (e) => srv.evs.filter((s) => !s.destroyed).forEach((s) => s.write(J
     assert.strictEqual(fs.statSync(ORDER).mode & 0o777, 0o600, 'order.json 0600');
     c.send({ cmd: 'swap', a: 2, b: 99 });
     await until(() => c.of('error').some((e) => e.cmd === 'swap'), 'bad swap refused');
-    const { swapped, effective } = require('../camsd.js');
+    const { swapped, effective } = require('../ridewatchd.js');
     assert.deepStrictEqual(swapped(null, [0, 1, 2, 3], 2, 3, 1), [2, 0, 3, 1], 'no order yet: the server\'s (hero, then camera order)');
     assert.deepStrictEqual(swapped([0, 1, 2, 3], [0, 1, 2, 3], 2, 1, 2), [1, 2, 0, 3], 'onto the hero: it becomes the order\'s first');
     assert.deepStrictEqual(effective([3, 2, 1, 0], 0), [0, 2, 1, 3], 'the hero and the order\'s first trade places');
@@ -451,6 +451,6 @@ const push = (e) => srv.evs.filter((s) => !s.destroyed).forEach((s) => s.write(J
     daemon.kill('SIGTERM');
     await new Promise((r) => daemon.on('exit', r));
     console.log('--- daemon log ---\n' + out.trim());
-    console.log('camsd_test: all checks passed (' + process.version + ')');
+    console.log('ridewatchd_test: all checks passed (' + process.version + ')');
     process.exit(0);
 })().catch((e) => { console.error('FAIL', e && e.stack || e); console.error(out); if (daemon) daemon.kill('SIGKILL'); process.exit(1); });

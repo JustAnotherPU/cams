@@ -1,4 +1,4 @@
-# camdec: the live H.264 decoder of jap-cams. README.md.
+# camdec: the live H.264 decoder of jap-ridewatch. README.md.
 #
 #   make test     host build + unit tests (SPS parser, live feeder, pacer,
 #                 NV12->I420, MGVF writer; NAL reader from idrive-apps' waze-on-cluster),

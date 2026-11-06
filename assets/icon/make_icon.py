@@ -1,4 +1,4 @@
-"""Draws the Cameras icon (icon.png, 140x140 RGBA): a white UniFi-Protect-style bullet camera, dark glass front,
+"""Draws the RideWatch icon (icon.png, 140x140 RGBA): a white UniFi-Protect-style bullet camera, dark glass front,
 blue lens ring and LED, on its wall arm; glossy like the kit's other app icons. Drawn at 4x, then downsampled.
     uv run --with pillow python assets/icon/make_icon.py [out.png]"""
 import math, sys

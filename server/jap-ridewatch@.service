@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 [Unit]
-Description=jap-cams stream %i
+Description=jap-ridewatch stream %i
 
 [Service]
 # one instance per connection; a stream that ends with the client is not kept as "failed"
 CollectMode=inactive-or-failed
-ExecStart=/usr/bin/python3 /opt/jap-cams/serve.py
+ExecStart=/usr/bin/python3 /opt/jap-ridewatch/serve.py
 StandardInput=socket
 StandardOutput=socket
 StandardError=journal
-User=japcams
-StateDirectory=jap-cams
+User=japridewatch
+StateDirectory=jap-ridewatch
 Nice=5
 # leave room for the rest of the machine: at most 6 cores and 1 GiB per stream (a mosaic of 11 cameras: ~1.2 cores)
 CPUQuota=600%

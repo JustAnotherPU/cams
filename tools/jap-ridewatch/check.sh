@@ -7,5 +7,5 @@ d=$(cd "$(dirname "$0")" && pwd)
 "$d/camdec" >/dev/null 2>&1
 rc=$?
 [ "$rc" -eq 2 ] || { echo "check: camdec without arguments exited $rc, not 2 (missing library?)" >&2; exit 1; }
-/var/opt/jap-node22/current/bin/node --check "$d/camsd.js" || exit 1
-exec /var/opt/jap-node22/current/bin/node -e "require('$d/camsd.js')"   # loads socks.js and jpeg-js, starts nothing
+/var/opt/jap-node22/current/bin/node --check "$d/ridewatchd.js" || exit 1
+exec /var/opt/jap-node22/current/bin/node -e "require('$d/ridewatchd.js')"   # loads socks.js and jpeg-js, starts nothing

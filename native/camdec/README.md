@@ -1,7 +1,7 @@
 # camdec
 
-The video half of jap-cams (BMW iDrive 7 MGU, Atom A3960, Intel HD 505):
-reads the live Annex-B H.264 stream from the jap-cams server on stdin,
+The video half of jap-ridewatch (BMW iDrive 7 MGU, Atom A3960, Intel HD 505):
+reads the live Annex-B H.264 stream from the RideWatch server on stdin,
 decodes it on the GPU with the unit's Intel Media SDK and writes I420
 frames to mgu-render's video file (MGVF, mgu-render `PROTOCOL.md`, "Video"),
 at a steady cadence from the stream's SPS frame rate.
@@ -36,7 +36,7 @@ path; the SSE2 path is checked in the x86_64 image (`make target`).
 ## Interface
 
 ```
-camdec --out /dev/shm/jap-video-cams [--log FILE]
+camdec --out /dev/shm/jap-video-ridewatch [--log FILE]
 ```
 
 stdin: raw Annex-B H.264, any chunking. stdout, JSON lines, one `write` each:
@@ -114,7 +114,7 @@ system-memory frames.
   the frame untouched); MGVF header (BT.709 = matrix 1, range 0, sizes,
   slot 1,2,0,1.. order, seq, slot content, re-creation on a new size).
 - Smoke test (`tools/smoke.py`, host binary with `test/fake_decoder.h`):
-  an ffmpeg/x264 test file and a jap-cams server capture fed at 30 fps in random
+  an ffmpeg/x264 test file and a RideWatch server capture fed at 30 fps in random
   chunks (`tools/feed.py`): steady, jitter 0..25 ms + 500 ms stall (burst cut
   down to 4), a decode error at AU 40 (error, ready again at the next IDR), a
   new SPS mid-stream (1280x720 20 fps: ready again, MGVF re-created), exit 2

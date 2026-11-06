@@ -1,10 +1,10 @@
 'use strict';
-// Offline smoke test of the built jap_cams app (moonlight's test/smoke.js pattern): a stubbed kit ctx (HMI, display in
-// the "fill" placement, speed signal), a fake camsd ctl socket and a fake mgu-render socket (native dialect) for CAM.
+// Offline smoke test of the built jap_ridewatch app (moonlight's test/smoke.js pattern): a stubbed kit ctx (HMI, display in
+// the "fill" placement, speed signal), a fake ridewatchd ctl socket and a fake mgu-render socket (native dialect) for CAM.
 // Covers concept A (spot layout, hero, pick, events, banner), the timeline (rows, thumbs, scroll, drag, back) and an
 // event's clip on CAM (overlay, progress, ended -> Replay / Live, back to the timeline), the config sent to the service.
 // Build first (./build.sh), then:
-//   node test/smoke.js build/kit/dist/jap_cams <tmpdir>     (Node 8: docker run --rm --network none -v $PWD:/w -w /w node:8.16.0-alpine ...)
+//   node test/smoke.js build/kit/dist/jap_ridewatch <tmpdir>     (Node 8: docker run --rm --network none -v $PWD:/w -w /w node:8.16.0-alpine ...)
 const assert = require('assert');
 const fs = require('fs');
 const net = require('net');
@@ -14,10 +14,10 @@ const Module = require('module');
 const stage = path.resolve(process.argv[2]), tmp = process.argv[3];
 const SRC = path.join(stage, 'source', 'javascript');
 const spec = JSON.parse(fs.readFileSync(path.join(SRC, 'kit', 'app-spec.json'), 'utf8'));
-const CTL = path.join(tmp, 'ctl.sock'), REN = path.join(tmp, 'render.sock'), VID = path.join(tmp, 'jap-video-cams');
+const CTL = path.join(tmp, 'ctl.sock'), REN = path.join(tmp, 'render.sock'), VID = path.join(tmp, 'jap-video-ridewatch');
 [CTL, REN].forEach((p) => { try { fs.unlinkSync(p); } catch (e) { /* none */ } });
 fs.writeFileSync(VID, Buffer.alloc(64));
-process.env.JAP_CAMS_CTL = CTL; process.env.MGU_RENDERD_SOCKET = REN; process.env.JAP_CAMS_VIDEO = VID;
+process.env.JAP_RIDEWATCH_CTL = CTL; process.env.MGU_RENDERD_SOCKET = REN; process.env.JAP_RIDEWATCH_VIDEO = VID;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function until(fn, what, ms) { const end = Date.now() + (ms || 3000); while (!fn()) { if (Date.now() > end) throw new Error('timed out: ' + what); await sleep(10); } }
@@ -120,7 +120,7 @@ Module._load = function (req) {
     stack = ['VIEW']; visH.forEach((f) => f('VIEW', true));
     assert.strictEqual(spec.screens.filter((s) => s.kind === 'canvas')[0].name, 'VIEW', 'VIEW is the first canvas screen (the kit draws it)');
     await until(() => d.cmds('status').length && d.cmds('list').length, 'status + list on connect');
-    await until(() => r.hello && r.hello.indexOf('jap_cams\0proto=mgu-render/1') === 0, 'native HELLO');
+    await until(() => r.hello && r.hello.indexOf('jap_ridewatch\0proto=mgu-render/1') === 0, 'native HELLO');
     // the settings go to the service first: defaults (no address yet), then again on a change
     assert.deepStrictEqual(d.cmds('config')[0], { cmd: 'config', host: [0, 0, 0, 0], port: 18640, socks: 1065, socksFallback: 0, lat: 0, lon: 0 }, 'config on connect');
     settings.set('server1', 192); settings.set('server2', 0); settings.set('server3', 2); settings.set('server4', 10); settings.set('lat', 51);

@@ -2,7 +2,7 @@
 // frame.js: the picture in a cam stream (as serve.py fit() places it) and the fill / whole / pan maths.
 //   node test/frame_test.js
 const assert = require('assert');
-const { picRect, defaultMode, place } = require('../../apps/jap_cams/frame');
+const { picRect, defaultMode, place } = require('../../apps/jap_ridewatch/frame');
 
 const S = { x: 0, y: 0, w: 1920, h: 720 };
 // serve.py fit(): 16:9 into 8:3 pads (crop 33 %), the 3:4 door 540x720, a square 720x720, unknown = 16:9

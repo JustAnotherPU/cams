@@ -1,17 +1,17 @@
 # Third-party components
 
-Cameras (jap-cams) is GPL-3.0-or-later (`../LICENSE`). It is built with, or ships, the components below. Each
+RideWatch (jap-ridewatch) is GPL-3.0-or-later (`../LICENSE`). It is built with, or ships, the components below. Each
 licence text is in this folder; files that carry their own copyright headers keep them.
 
 | Component | Where | Licence | File |
 |---|---|---|---|
-| jpeg-js 0.4.4 (decoder only, github.com/jpeg-js/jpeg-js) | `daemon/vendor/jpeg-js`, in the `jap-cams` package | BSD-3-Clause; `decoder.js` itself is Apache-2.0 (Copyright 2011 notmasteryet, from pdf.js, as its header says) | `jpeg-js.LICENSE` (also beside the code), `Apache-2.0.txt` |
+| jpeg-js 0.4.4 (decoder only, github.com/jpeg-js/jpeg-js) | `daemon/vendor/jpeg-js`, in the `jap-ridewatch` package | BSD-3-Clause; `decoder.js` itself is Apache-2.0 (Copyright 2011 notmasteryet, from pdf.js, as its header says) | `jpeg-js.LICENSE` (also beside the code), `Apache-2.0.txt` |
 | Intel Media SDK headers | `native/camdec/abi/include/mfx` (headers only, to build against the head unit's library) | MIT | `intel-mediasdk-headers.LICENSE` |
-| App kit (`kit/`), from github.com/cauliflowermossgrape/idrive7-apps, modified | `kit/`, in the `jap_cams` package | MIT | `app-kit.LICENSE` (also `kit/LICENSE`) |
+| App kit (`kit/`), from github.com/cauliflowermossgrape/idrive7-apps, modified | `kit/`, in the `jap_ridewatch` package | MIT | `app-kit.LICENSE` (also `kit/LICENSE`) |
 | Noto Sans SC glyphs (in the kit's fonts) | `kit/runtime/fonts/cjk.json` | SIL OFL 1.1 | `noto-sans-sc.OFL.txt` (also beside the fonts) |
 | Ubuntu font glyphs, rasterised (in the kit's fonts) | `kit/runtime/fonts/{label,bold,num,light,gear}.json` | Ubuntu Font Licence 1.0 | `ubuntu-font.UFL-1.0.txt` (also beside the fonts) |
 
-The `jap-cams` tool package carries `LICENSE`, the jpeg-js licences and the Media SDK headers' licence; the app
+The `jap-ridewatch` tool package carries `LICENSE`, the jpeg-js licences and the Media SDK headers' licence; the app
 package carries `LICENSE`, the kit's licence and the font licences.
 
 Files copied from github.com/robertnisipeanu/idrive-apps (Copyright (C) 2026 Robert Nisipeanu, GPL-3.0-or-later

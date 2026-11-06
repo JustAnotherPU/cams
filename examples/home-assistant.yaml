@@ -1,21 +1,21 @@
-# Optional: Home Assistant sends the detections to the jap-cams server instead of (or as well as) Protect's own event
-# list (server/events.py). Put this in a package (packages/jap_cams.yaml), set in cams.json on the server
+# Optional: Home Assistant sends the detections to the RideWatch server instead of (or as well as) Protect's own event
+# list (server/events.py). Put this in a package (packages/jap_ridewatch.yaml), set in cams.json on the server
 #   "events_from": "<Home Assistant's IP>", "events_token": "<a long random string>"
-# and "events_protect": false to stop polling Protect. jap_cams_events_token goes in secrets.yaml.
+# and "events_protect": false to stop polling Protect. jap_ridewatch_events_token goes in secrets.yaml.
 # The entity ids below are examples from the UniFi Protect integration: use yours. "cam" is the Protect camera's name.
 rest_command:
-  jap_cams_event:
+  jap_ridewatch_event:
     url: http://192.0.2.10:18641/event
     method: POST
     timeout: 5
     headers:
-      X-Token: !secret jap_cams_events_token
+      X-Token: !secret jap_ridewatch_events_token
     content_type: application/json
     payload: '{"cam": {{ cam | tojson }}, "type": {{ type | tojson }}}'
 
 automation:
-  - id: jap_cams_timeline_push
-    alias: "jap-cams: detections to the car"
+  - id: jap_ridewatch_timeline_push
+    alias: "RideWatch: detections to the car"
     mode: queued
     max: 20
     trigger:
@@ -34,7 +34,7 @@ automation:
         not_from: ["unavailable", "unknown"]
         not_to: ["unavailable", "unknown"]
     action:
-      - action: rest_command.jap_cams_event
+      - action: rest_command.jap_ridewatch_event
         continue_on_error: true
         data:
           cam: "{{ device_attr(device_id(trigger.entity_id), 'name') }}"

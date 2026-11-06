@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 JustAnotherPU
-"""jap-cams events: the detections for the car's "What happened" timeline, read by serve.py (`events`, `thumb <id>`).
+"""jap-ridewatch events: the detections for the car's "What happened" timeline, read by serve.py (`events`, `thumb <id>`).
 
 From Protect (the default, when cams.json has "protect"): every POLL_S seconds, GET /proxy/protect/api/events over
 the last OVERLAP_S (an event can be written after it started) with the read-only user's session (serve.py
@@ -14,12 +14,12 @@ POST :18641/event   header X-Token: <events_token>   body {"cam": "<Protect came
 - Only from the HA host (`events_from`) with the events token (not a car's code).
 Both: a burst = same camera + type within MERGE_S of its last hit: one row, count + 1, ts = last hit. New rows get a
 320x180 JPEG grabbed from the camera's first keyframe (the subject is usually still there). Kept: KEEP_DAYS days, at
-most KEEP_N rows, in /var/lib/jap-cams/events.json (+ thumbs/<id>.jpg).
+most KEEP_N rows, in /var/lib/jap-ridewatch/events.json (+ thumbs/<id>.jpg).
 """
 import http.server, json, os, re, secrets, subprocess, sys, threading, time, urllib.parse
 
-CONF = os.environ.get('JAP_CAMS_CONF', '/opt/jap-cams/cams.json')
-DIR = os.environ.get('JAP_CAMS_STATE', '/var/lib/jap-cams')
+CONF = os.environ.get('JAP_RIDEWATCH_CONF', '/opt/jap-ridewatch/cams.json')
+DIR = os.environ.get('JAP_RIDEWATCH_STATE', '/var/lib/jap-ridewatch')
 DB, THUMBS = os.path.join(DIR, 'events.json'), os.path.join(DIR, 'thumbs')
 MERGE_S, KEEP_DAYS, KEEP_N = 120, 7, 500
 POLL_S, OVERLAP_S, BACKOFF_MAX = 3, 120, 300
@@ -236,7 +236,7 @@ def poll_selftest():
             self.reply(200, json.dumps([e for e in P['events'] if not isinstance(e, dict) or lo <= e.get('start', lo) <= hi]).encode())
     srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Fake)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
-    os.environ['JAP_CAMS_PROTECT_URL'] = 'http://127.0.0.1:%d' % srv.server_address[1]
+    os.environ['JAP_RIDEWATCH_PROTECT_URL'] = 'http://127.0.0.1:%d' % srv.server_address[1]
     json.dump({'protect': {'host': '192.0.2.1', 'username': 'u', 'password': 'p'},
                'cams': [{'name': 'Door', 'protectId': 'c0', 'channels': []}, {'name': 'Garage', 'protectId': 'c1', 'channels': []}]}, open(CONF, 'w'))
     t0 = now[0]
@@ -274,7 +274,7 @@ def poll_selftest():
     P['down'] = False; waits.clear()
     poller(sleep=step, polls=1, clock=clock)
     assert waits == [3], waits
-    os.environ.pop('JAP_CAMS_PROTECT_URL'); srv.shutdown(); shutil.rmtree(d)
+    os.environ.pop('JAP_RIDEWATCH_PROTECT_URL'); srv.shutdown(); shutil.rmtree(d)
     print('poll selftest ok')
 
 
