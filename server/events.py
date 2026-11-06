@@ -160,13 +160,15 @@ def poller(sleep=time.sleep, polls=None, grab_=None, clock=time.time):
 
 
 class H(http.server.BaseHTTPRequestHandler):
+    timeout = 10                                      # a half-sent request does not keep its thread
+
     def do_POST(self):
         conf = json.load(open(CONF))
         if (self.path != '/event' or self.client_address[0] != conf.get('events_from')
                 or not secrets.compare_digest(self.headers.get('X-Token', ''), conf.get('events_token', '-'))):
             self.send_response(403); self.end_headers(); return
         try:
-            body = json.loads(self.rfile.read(min(int(self.headers.get('Content-Length', 0)), 4096)))
+            body = json.loads(self.rfile.read(max(0, min(int(self.headers.get('Content-Length', 0)), 4096))))
             name, typ = str(body['cam']), str(body['type'])
         except (ValueError, KeyError, TypeError):
             self.send_response(400); self.end_headers(); return
@@ -284,6 +286,7 @@ if __name__ == '__main__':
         conf = json.load(open(CONF))
         ha = conf.get('events_from') and conf.get('events_token')
         if conf.get('protect') and conf.get('events_protect', True):
-            threading.Thread(target=poller, daemon=not ha).start()
+            threading.Thread(target=poller, daemon=True).start()
         if ha:
             http.server.ThreadingHTTPServer(('0.0.0.0', 18641), H).serve_forever()
+        threading.Event().wait()                      # the poller alone: keep the process

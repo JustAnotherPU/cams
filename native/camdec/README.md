@@ -125,9 +125,9 @@ system-memory frames.
 
 ## On the car
 
-Tested on one iDrive 7 car only. `decode_ms`, the CPU cost of the deinterleave and the surface count
-(suggested + 6 held, ~2 MB each at 1920x720) were not measured on other units. The `stats` lines in the
-service's log give them.
+Not measured on a car yet: `decode_ms`, the CPU cost of the deinterleave, the surface count (suggested + 6
+held, ~2 MB each at 1920x720) and whether `GPUCopy ON` covers the decoder's copy to system memory. The `stats`
+lines in the service's log give them.
 
 ## Possible later work
 

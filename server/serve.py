@@ -23,7 +23,7 @@ Config /opt/jap-cams/cams.json (0600, written by configure.py):
              "channels": [{"id", "w", "h", "fps", "alias", "url"?}]}]}
   (a channel's "url", by hand: another RTSP source for that camera, used instead of Protect's RTSPS)
 """
-import json, math, os, re, secrets, subprocess, sys, tempfile
+import json, math, os, re, secrets, signal, subprocess, sys, tempfile
 
 CONF = os.environ.get('JAP_CAMS_CONF', '/opt/jap-cams/cams.json')
 URL = 'rtsps://{}:7441/{}'  # Protect's RTSPS, on the Protect host (use())
@@ -161,10 +161,12 @@ def encode(fps):
 
 
 def main():
+    signal.alarm(10)                                  # a silent peer must not hold one of the socket's connections
     conf = json.load(open(CONF))
     line = sys.stdin.buffer.readline(256).decode('ascii', 'replace').split()
     if len(line) < 2 or not any(secrets.compare_digest(line[0].encode(), t) for t in tokens(conf)):
         sys.exit(1)                                   # an unknown car: close, say nothing
+    signal.alarm(0)
     use(conf)
     cams = conf['cams']
     RATE[:] = [int(conf.get('maxrate_k', RATE[0])), int(conf.get('bufsize_k', RATE[1]))]

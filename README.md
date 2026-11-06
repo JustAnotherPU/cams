@@ -161,7 +161,8 @@ Warranty) and 16 (Limitation of Liability) of the GNU General Public License v3 
 
 ## Known limits
 
-- iDrive 7 (ID7) only, tested on one car, with one Protect console and about ten cameras.
+- iDrive 7 (ID7) only. The server and the tunnel were measured from one car; the app, the service and the decoder
+  are checked by offline tests, and their CPU and decode times on the head unit are not measured yet.
 - Protect's API is private and changes between versions. The login, the RTSPS streams and the export used for
   clips were tested with one console. The camera list (`/proxy/protect/api/cameras`, read by `configure.py`) and
   the event list (`/proxy/protect/api/events`, the default source of detections) are new in this release and were

@@ -83,11 +83,12 @@ def setup():
     if pw:
         p['password'] = pw
     conf['protect'] = p
-    os.environ['JAP_CAMS_STATE'] = serve.STATE = tempfile.mkdtemp(prefix='jap-cams-setup-')   # no root-owned session left behind
-    try:
-        found, off = serve.discover(conf)
-    except serve.ProtectError as e:
-        sys.exit('Protect: %s (%s)' % (e.args[0], e.args[1]))
+    with tempfile.TemporaryDirectory(prefix='jap-cams-setup-') as tmp:   # no root-owned Protect session left behind
+        os.environ['JAP_CAMS_STATE'] = serve.STATE = tmp
+        try:
+            found, off = serve.discover(conf)
+        except serve.ProtectError as e:
+            sys.exit('Protect: %s (%s)' % (e.args[0], e.args[1]))
     if off:
         print('\nRTSPS is off on these channels (turn it on in Protect, in each camera\'s Advanced settings, then run this again):')
         for x in off:

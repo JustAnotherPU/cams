@@ -103,7 +103,9 @@ const CODE = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';     // no 0/O or 1/I: read off 
 /** The car's code: the token the server knows this car by, 16 characters from CODE (80 bits) in groups of 4. */
 const newCode = () => Array.from(require('crypto').randomBytes(16), (b) => CODE[b & 31]).join('').replace(/(.{4})(?=.)/g, '$1-');
 function readConf() {
-    try { return JSON.parse(fs.readFileSync(CONF, 'utf8')); } catch (e) { if (e.code === 'ENOENT') return {}; throw e; }
+    let t;
+    try { t = fs.readFileSync(CONF, 'utf8'); } catch (e) { if (e.code === 'ENOENT') return {}; throw e; }
+    try { return JSON.parse(t); } catch (e) { throw new Error('server.json unreadable'); }   // (the parse error quotes the file: the code)
 }
 function writeConf(c) {
     fs.writeFileSync(CONF + '.tmp', JSON.stringify(c, null, 1) + '\n', { mode: 0o600 });
@@ -161,8 +163,9 @@ async function list() {
     sock.write(c.token + ' list\n');
     return new Promise((resolve, reject) => {
         const bufs = [rest];
+        let n = rest.length;
         sock.setTimeout(10000, () => sock.destroy(new Error('no answer')));
-        sock.on('data', (d) => bufs.push(d));
+        sock.on('data', (d) => { bufs.push(d); if ((n += d.length) > 1048576) sock.destroy(new Error('camera list too big')); });
         sock.on('error', reject);
         sock.on('close', () => {
             const b = Buffer.concat(bufs);
